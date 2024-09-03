@@ -7,11 +7,10 @@ from typing import Callable
 
 if len(sys.argv) < 2:
     print(">>> table \"lambda ...: True\"")
-    exit(0)
+    exit(1)
 
 func: Callable = eval(sys.argv[1])
 args = inspect.getfullargspec(func).args 
-print(args)
 
 args_name = ', '.join(list(map(lambda x: f"[{x}]", args)))
 res = []
@@ -19,14 +18,22 @@ res = []
 for i in product([0, 1], repeat=len(args)):
     res += list(i) + [func(*i)]
 
-res = ', '.join(list(map(lambda x: f"[{x}]", res)))
+res = ', '.join(list(map(lambda x: 'fal' if x == 0 else 'tru', res)))
 
 table = f"""
+#let fal = table.cell(
+  fill: red.lighten(60%)
+)[False]
+
+#let tru = table.cell(
+  fill: green.lighten(60%)
+)[False]
+
 #table(
     columns: {len(args) + 1},
     stroke: 0.5pt,
     align: center+ horizon,
-    {args_name}, [f = {sys.argv[1].split(':')[-1].strip()}],
+    {args_name}, [${sys.argv[1].split(':')[-1].strip().replace("<=", "->").replace("==", "equiv")}$],
     {res}
 )
 """
